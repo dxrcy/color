@@ -47,7 +47,16 @@ class State {
             let group = this[mode];
             console.log(group);
             for (let { id } of list) {
-                document.querySelector(`#slider-${id}`).value = group[id];
+                let value = group[id];
+                document.querySelector(`#slider-${id}`).value = value;
+
+                let alt = { ...group };
+                alt[id] = 0;
+                let min_color = `rgb(${alt.r}, ${alt.g}, ${alt.b})`;
+                alt[id] = 255;
+                let max_color = `rgb(${alt.r}, ${alt.g}, ${alt.b})`;
+                let gradient = `linear-gradient(to right, ${min_color}, ${max_color})`;
+                document.querySelector(`#slider-${id}`).style.background = gradient;
             }
         }
         
@@ -56,6 +65,11 @@ class State {
         document.querySelector("#display").style.backgroundColor = hex;
     }
 
+    static reset() {
+        this.rgb = { r: 0, g: 0, b: 0 };
+        this.sync("rgb");
+        this.push();
+    }
     static randomize() {
         this.rgb = random_rgb();
         this.sync("rgb");
@@ -65,7 +79,7 @@ class State {
 
 function init() {
     create_sliders();
-    State.randomize();
+    State.reset();
 }
 
 const SLIDERS = [
