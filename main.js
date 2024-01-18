@@ -20,7 +20,7 @@ class State {
                 this.hsv.v = parseFloat(document.querySelector("#slider-v").value);
             }; break;
             default: {
-                throw `Invalid mode '${mode}'`
+                throw `Invalid mode '${mode}'`;
             }
         }
         this.sync(mode);
@@ -37,7 +37,7 @@ class State {
                 this.rgb = hsv_to_rgb(this.hsv);
             }; break;
             default: {
-                throw `Invalid mode '${mode}'`
+                throw `Invalid mode '${mode}'`;
             }
         }
     }
@@ -49,15 +49,29 @@ class State {
             for (let { id } of list) {
                 let value = group[id];
                 document.querySelector(`#slider-${id}`).value = value;
-
-                let alt = { ...group };
-                alt[id] = 0;
-                let min_color = `rgb(${alt.r}, ${alt.g}, ${alt.b})`;
-                alt[id] = 255;
-                let max_color = `rgb(${alt.r}, ${alt.g}, ${alt.b})`;
-                let gradient = `linear-gradient(to right, ${min_color}, ${max_color})`;
-                document.querySelector(`#slider-${id}`).style.background = gradient;
             }
+        }
+
+        const COLORS = [
+            { mode: "rgb", id: "r", colors: (group) => [
+                `rgb(0,   ${group.g}, ${group.b})`,
+                `rgb(255, ${group.g}, ${group.b})`,
+            ] },
+            { mode: "rgb", id: "g", colors: (group) => [
+                `rgb(${group.g}, 0,   ${group.b})`,
+                `rgb(${group.g}, 255, ${group.b})`,
+            ] },
+            { mode: "rgb", id: "b", colors: (group) => [
+                `rgb(${group.g}, ${group.b}, 0  )`,
+                `rgb(${group.g}, ${group.b}, 255)`,
+            ] },
+        ];
+
+        for (let { mode, id, colors } of COLORS) {
+            let group = this[mode];
+            let [min, max] = colors(group);
+            let gradient = `linear-gradient(to right, ${min}, ${max})`;
+            document.querySelector(`#slider-${id}`).style.background = gradient;
         }
         
         let hex = rgb_to_hex(this.rgb);
