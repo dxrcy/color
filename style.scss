@@ -3,6 +3,14 @@ body {
     background-color: #111;
     color: white;
 
+    #color {}
+
+    #display {
+        width: 200px;
+        height: 50px;
+        margin-top: 10px;
+    }
+
     #sliders {
         input[type="range"] {
             width: 200px;

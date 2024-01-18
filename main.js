@@ -4,6 +4,11 @@ class State {
 
     static pull(mode) {
         switch (mode) {
+            case "_color": {
+                let hex = document.querySelector("#color").value;
+                this.rgb = hex_to_rgb(hex);
+                mode = "rgb";
+            }; break;
             case "rgb": {
                 this.rgb.r = parseFloat(document.querySelector("#slider-r").value);
                 this.rgb.g = parseFloat(document.querySelector("#slider-g").value);
@@ -45,16 +50,79 @@ class State {
                 document.querySelector(`#slider-${id}`).value = group[id];
             }
         }
+        
+        let hex = rgb_to_hex(this.rgb);
+        document.querySelector("#color").value = hex;
+        document.querySelector("#display").style.backgroundColor = hex;
     }
 
     static randomize() {
-        let r = 100;
-        let g = 100;
-        let b = 100;
-        this.rgb = { r, g, b };
+        this.rgb = random_rgb();
         this.sync("rgb");
         this.push();
     }
+}
+
+function init() {
+    create_sliders();
+    State.randomize();
+}
+
+const SLIDERS = [
+    {
+        mode: "rgb",
+        list: [ {id: "r", max: 255}, {id: "g", max: 255}, {id: "b", max: 255}],
+    },
+    {
+        mode: "hsv",
+        list: [ {id: "h", max: 360}, {id: "s", max: 100}, {id: "v", max: 100}],
+    },
+];
+
+function create_sliders() {
+    let html = "";
+    for (let { mode, list } of SLIDERS) {
+        html += render_slider_group(mode, list);
+    }
+    document.querySelector("#sliders").innerHTML = html;
+}
+
+function render_slider_group(mode, list) {
+    let sliders = "";
+    for (let { id, max } of list) {
+        sliders += render_slider(mode, id, max);
+    }
+    return `
+        <div>
+        <h3>${mode}</h3>
+        ${sliders}
+        </div>
+        `;
+}
+
+function render_slider(mode, id, max) {
+    return `
+        <input
+    type="range"
+    data-mode="${mode}"
+    id="slider-${id}"
+    value="0"
+    min="0"
+    max="${max}"
+    oninput="State.pull('${mode}')"
+        >
+        `;
+}
+
+function random_rgb() {
+    return {
+        r: random_component(),
+        g: random_component(),
+        b: random_component(),
+    };
+}
+function random_component() {
+    return Math.floor(Math.random() * 255);
 }
 
 function hsv_to_rgb({ h, s, v }) {
@@ -100,55 +168,18 @@ function rgb_to_hsv({ r, g, b }) {
         v: v * 100,
     };
 }
-
-function init() {
-    create_sliders();
-    State.randomize();
+function component_to_hex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
 }
-
-const SLIDERS = [
-    {
-        mode: "rgb",
-        list: [ {id: "r", max: 255}, {id: "g", max: 255}, {id: "b", max: 255}],
-    },
-    {
-        mode: "hsv",
-        list: [ {id: "h", max: 360}, {id: "s", max: 100}, {id: "v", max: 100}],
-    },
-];
-
-function create_sliders() {
-    let html = "";
-    for (let { mode, list } of SLIDERS) {
-        html += render_slider_group(mode, list);
-    }
-    document.querySelector("#sliders").innerHTML = html;
+function rgb_to_hex({ r, g, b }) {
+    return "#" + component_to_hex(r) + component_to_hex(g) + component_to_hex(b);
 }
-
-function render_slider_group(mode, list) {
-    let sliders = "";
-    for (let { id, max } of list) {
-        sliders += render_slider(mode, id, max);
-    }
-    return `
-        <div>
-            <h3>${mode}</h3>
-            ${sliders}
-        </div>
-    `;
+function hex_to_rgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
 }
-
-function render_slider(mode, id, max) {
-    return `
-        <input
-            type="range"
-            data-mode="${mode}"
-            id="slider-${id}"
-            value="0"
-            min="0"
-            max="${max}"
-            onchange="State.pull('${mode}')"
-        >
-    `;
-}
-
