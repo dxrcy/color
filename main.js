@@ -62,8 +62,16 @@ class State {
                 `rgb(${group.g}, 255, ${group.b})`,
             ] },
             { mode: "rgb", id: "b", colors: (group) => [
-                `rgb(${group.g}, ${group.b}, 0  )`,
+                `rgb(${group.g}, ${group.b}, 0)`,
                 `rgb(${group.g}, ${group.b}, 255)`,
+            ] },
+            { mode: "hsv", id: "s", colors: (group) => [
+                `hsl(${group.h}, 0%,   ${group.v}%)`,
+                `hsl(${group.h}, 100%, ${group.v / 2}%)`,
+            ] },
+            { mode: "hsv", id: "v", colors: (group) => [
+                `hsl(${group.h}, ${group.s}%, 0%)`,
+                `hsl(${group.h}, ${group.s}%, 50%)`,
             ] },
         ];
 
@@ -71,6 +79,7 @@ class State {
             let group = this[mode];
             let [min, max] = colors(group);
             let gradient = `linear-gradient(to right, ${min}, ${max})`;
+            console.log(gradient);
             document.querySelector(`#slider-${id}`).style.background = gradient;
         }
         
