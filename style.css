@@ -1,5 +1,18 @@
 body {
-    font-family: Arial;
-    background-color: #111;
-    color: white;
+  font-family: Arial;
+  background-color: #111;
+  color: white;
+}
+body #sliders input[type=range] {
+  width: 200px;
+  height: 30px;
+  border-radius: 5px;
+}
+body #sliders input[type=range]::-moz-range-thumb {
+  width: 5px;
+  height: 40px;
+  background: transparent;
+  border: 1px solid black;
+  outline: 1px solid white;
+  cursor: ew-resize;
 }
