@@ -9,7 +9,6 @@ body .display {
   height: 4em;
   margin-top: 10px;
   justify-content: space-between;
-  background-color: #040404;
 }
 body .display div {
   display: flex;
@@ -24,6 +23,12 @@ body .display div:nth-child(2), body .display div:nth-child(4) {
 body .display div:nth-child(3) {
   flex: 14;
 }
+body .display div:first-child {
+  border-radius: 10px 0 0 10px;
+}
+body .display div:last-child {
+  border-radius: 0 10px 10px 0;
+}
 body .display div:active:not(:focus-within) {
   filter: brightness(95%);
 }
@@ -34,7 +39,7 @@ body .display div .hex-full {
   font-size: 120%;
   font-family: monospace;
 }
-body .display div .hex-full .hashtag {
+body .display div .hex-full .prefix {
   position: absolute;
   left: 0.35em;
   font-family: inherit;
