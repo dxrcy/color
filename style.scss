@@ -12,18 +12,45 @@ body {
     }
 
     #sliders {
-        input[type="range"] {
-            width: 200px;
-            height: 30px;
-            border-radius: 5px;
+        display: flex;
+        gap: 30px;
 
-            &::-moz-range-thumb {
-                width: 5px;
-                height: 40px;
-                background: transparent;
-                border: 1px solid black;
-                outline: 1px solid white;
-                cursor: ew-resize;
+        .group {
+            .mode { }
+            
+            .rows {
+                display: flex;
+                flex-direction: column;
+                width: 200px;
+                gap: 10px;
+
+                .row {
+                    display: flex;
+                    gap: 5px;
+                    align-items: center;
+                    // background-color: blue;
+
+                    label {
+                        width: 20px;
+                        text-align: center;
+                        // background-color: red;
+                    }
+
+                    input[type="range"] {
+                        width: 100%;
+                        height: 30px;
+                        border-radius: 5px;
+
+                        &::-moz-range-thumb {
+                            width: 5px;
+                            height: 40px;
+                            background: transparent;
+                            border: 1px solid black;
+                            outline: 1px solid white;
+                            cursor: ew-resize;
+                        }
+                    }
+                }
             }
         }
     }

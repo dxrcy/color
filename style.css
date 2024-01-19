@@ -8,12 +8,31 @@ body #display {
   height: 50px;
   margin-top: 10px;
 }
-body #sliders input[type=range] {
+body #sliders {
+  display: flex;
+  gap: 30px;
+}
+body #sliders .group .rows {
+  display: flex;
+  flex-direction: column;
   width: 200px;
+  gap: 10px;
+}
+body #sliders .group .rows .row {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+body #sliders .group .rows .row label {
+  width: 20px;
+  text-align: center;
+}
+body #sliders .group .rows .row input[type=range] {
+  width: 100%;
   height: 30px;
   border-radius: 5px;
 }
-body #sliders input[type=range]::-moz-range-thumb {
+body #sliders .group .rows .row input[type=range]::-moz-range-thumb {
   width: 5px;
   height: 40px;
   background: transparent;

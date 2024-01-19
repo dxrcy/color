@@ -166,24 +166,30 @@ function render_slider_group(mode, list) {
         sliders += render_slider(mode, id, max);
     }
     return `
-        <div>
-            <h3> ${mode} </h3>
-            ${sliders}
+        <div class="group">
+            <h3 class="mode"> ${mode.toUpperCase()} </h3>
+            <div class="rows">
+                ${sliders}
+            </div>
         </div>
     `;
 }
 
 function render_slider(mode, id, max) {
     return `
-        <input
-            type="range"
-            data-mode="${mode}"
-            id="slider-${id}"
-            value="0"
-            min="0"
-            max="${max}"
-            oninput="State.pull('${mode}')"
-        >
+        <div class="row">
+            <label for="${id}"> ${id.toUpperCase()} </label>
+            <input
+                type="range"
+                data-mode="${mode}"
+                id="slider-${id}"
+                name="${id}"
+                value="0"
+                min="0"
+                max="${max}"
+                oninput="State.pull('${mode}')"
+            >
+        </div>
     `;
 }
 
