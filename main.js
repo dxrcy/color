@@ -36,6 +36,81 @@ class State {
     static hsv  = { h: 0, s: 0, v: 0 };
     static cmyk = { c: 0, m: 0, y: 0, k: 0 };
 
+    static cache = {
+        h: 0,
+        s: 0,
+    };
+
+    static sync(mode) {
+        console.log(`Update for ${mode}`);
+        switch (mode) {
+
+            case "rgb": {
+                this.cmyk = rgb_to_cmyk(this.rgb);
+                this.hsv = rgb_to_hsv(this.rgb);
+                this.update_cache_hsv();
+                this.update_cache_cmyk();
+            }; break;
+
+            case "hsv": {
+                this.rgb = hsv_to_rgb(this.hsv);
+                this.cmyk = rgb_to_cmyk(this.rgb);
+                this.update_cache_cmyk();
+                this.override_cmyk();
+            }; break;
+
+            case "cmyk": {
+                this.rgb = cmyk_to_rgb(this.cmyk);
+                this.hsv = rgb_to_hsv(this.rgb);
+                this.update_cache_hsv();
+                this.override_hsv();
+            }; break;
+
+            default: {
+                throw `Invalid mode '${mode}'`;
+            }
+        }
+    }
+
+    static update_cache_hsv() {
+        if (this.hsv.v == 0) {
+            this.hsv.s = Math.round(this.cache.s / 100) * 100;
+        } else {
+            this.cache.s = this.hsv.s;
+        }
+        if (this.hsv.s == 0 || this.hsv.v == 0) {
+            this.hsv.h = this.cache.h;
+        } else {
+            this.cache.h = this.hsv.h;
+        }
+    }
+    static update_cache_cmyk() {
+        if (this.hsv.v == 0) {
+            this.cmyk.c = this.cache.c;
+            this.cmyk.m = this.cache.m;
+            this.cmyk.y = this.cache.y;
+        } else {
+            this.cache.c = this.cmyk.c;
+            this.cache.m = this.cmyk.m;
+            this.cache.y = this.cmyk.y;
+        }
+    }
+    static override_hsv() {
+        if (this.cmyk.k == 100) {
+            let hsv = cmyk_to_hsv({ ...this.cmyk, k: 50 });
+            this.hsv.h = hsv.h;
+            this.hsv.s = hsv.s;
+        }
+    }
+    static override_cmyk() {
+        if (this.hsv.v == 0) {
+            let cmyk = hsv_to_cmyk({ ...this.hsv, v: 100 });
+            this.cmyk.c = cmyk.c;
+            this.cmyk.m = cmyk.m;
+            this.cmyk.y = cmyk.y;
+        }
+    }
+
     static pull(mode) {
         switch (mode) {
             case "_color": {
@@ -44,20 +119,20 @@ class State {
                 mode = "rgb";
             }; break;
             case "rgb": {
-                this.rgb.r = parseFloat(document.querySelector("#slider-r").value);
-                this.rgb.g = parseFloat(document.querySelector("#slider-g").value);
-                this.rgb.b = parseFloat(document.querySelector("#slider-b").value);
+                this.rgb.r = parseInt(document.querySelector("#slider-r").value);
+                this.rgb.g = parseInt(document.querySelector("#slider-g").value);
+                this.rgb.b = parseInt(document.querySelector("#slider-b").value);
             }; break;
             case "hsv": {
-                this.hsv.h = parseFloat(document.querySelector("#slider-h").value);
-                this.hsv.s = parseFloat(document.querySelector("#slider-s").value);
-                this.hsv.v = parseFloat(document.querySelector("#slider-v").value);
+                this.hsv.h = parseInt(document.querySelector("#slider-h").value);
+                this.hsv.s = parseInt(document.querySelector("#slider-s").value);
+                this.hsv.v = parseInt(document.querySelector("#slider-v").value);
             }; break;
             case "cmyk": {
-                this.cmyk.c = parseFloat(document.querySelector("#slider-c").value);
-                this.cmyk.m = parseFloat(document.querySelector("#slider-m").value);
-                this.cmyk.y = parseFloat(document.querySelector("#slider-y").value);
-                this.cmyk.k = parseFloat(document.querySelector("#slider-k").value);
+                this.cmyk.c = parseInt(document.querySelector("#slider-c").value);
+                this.cmyk.m = parseInt(document.querySelector("#slider-m").value);
+                this.cmyk.y = parseInt(document.querySelector("#slider-y").value);
+                this.cmyk.k = parseInt(document.querySelector("#slider-k").value);
             }; break;
             default: {
                 throw `Invalid mode '${mode}'`;
@@ -67,34 +142,13 @@ class State {
         this.push();
     }
 
-    static sync(mode) {
-        console.log(`Update for ${mode}`);
-        switch (mode) {
-            case "rgb": {
-                this.cmyk = rgb_to_cmyk(this.rgb);
-                this.hsv = rgb_to_hsv(this.rgb);
-            }; break;
-            case "hsv": {
-                this.rgb = hsv_to_rgb(this.hsv);
-                this.cmyk = rgb_to_cmyk(this.rgb);
-            }; break;
-            case "cmyk": {
-                this.rgb = cmyk_to_rgb(this.cmyk);
-                this.hsv = rgb_to_hsv(this.rgb);
-            }; break;
-            default: {
-                throw `Invalid mode '${mode}'`;
-            }
-        }
-    }
-
     static push() {
         for (let { mode, list } of SLIDERS) {
             let group = this[mode];
             console.log(group);
             for (let { id } of list) {
                 let value = group[id];
-                document.querySelector(`#slider-${id}`).value = value;
+                document.querySelector(`#slider-${id}`).value = Math.round(value);
             }
         }
 
@@ -228,9 +282,9 @@ function hsv_to_rgb(hsv) {
         case 5: r = v, g = p, b = q; break;
     }
     return {
-        r: Math.round(r * 255),
-        g: Math.round(g * 255),
-        b: Math.round(b * 255)
+        r: (r * 255),
+        g: (g * 255),
+        b: (b * 255)
     };
 }
 function rgb_to_hsv(rgb) {
@@ -247,9 +301,6 @@ function rgb_to_hsv(rgb) {
         case r: h = (g - b) + d * (g < b ? 6: 0); h /= 6 * d; break;
         case g: h = (b - r) + d * 2; h /= 6 * d; break;
         case b: h = (r - g) + d * 4; h /= 6 * d; break;
-    }
-    if (v == 0) {
-        s = 100;
     }
     return {
         h: h * 360,
@@ -287,10 +338,10 @@ function rgb_to_cmyk(rgb) {
     const adjusted_m = (m - k) / (1 - k);
     const adjusted_y = (y - k) / (1 - k);
     return {
-        c: Math.round(adjusted_c * 100),
-        m: Math.round(adjusted_m * 100),
-        y: Math.round(adjusted_y * 100),
-        k: Math.round(k * 100)
+        c: (adjusted_c * 100),
+        m: (adjusted_m * 100),
+        y: (adjusted_y * 100),
+        k: (k * 100)
     };
 }
 function cmyk_to_rgb(cmyk) {
@@ -298,12 +349,20 @@ function cmyk_to_rgb(cmyk) {
     const m = cmyk.m / 100;
     const y = cmyk.y / 100;
     const k = cmyk.k / 100;
-    const r = Math.round(255 * (1 - c) * (1 - k));
-    const g = Math.round(255 * (1 - m) * (1 - k));
-    const b = Math.round(255 * (1 - y) * (1 - k));
+    const r = (255 * (1 - c) * (1 - k));
+    const g = (255 * (1 - m) * (1 - k));
+    const b = (255 * (1 - y) * (1 - k));
     return {
         r: Math.min(255, Math.max(0, r)),
         g: Math.min(255, Math.max(0, g)),
         b: Math.min(255, Math.max(0, b))
     };
+}
+function cmyk_to_hsv(cmyk) {
+    let rgb = cmyk_to_rgb(cmyk);
+    return rgb_to_hsv(rgb);
+}
+function hsv_to_cmyk(hsv) {
+    let rgb = hsv_to_rgb(hsv);
+    return rgb_to_cmyk(rgb);
 }
