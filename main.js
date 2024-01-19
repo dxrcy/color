@@ -115,7 +115,11 @@ class State {
     static set_hue_gradient() {
         let steps = [];
         for (let h = 0; h <= 360; h += 5) {
-            let { r, g, b } = hsv_to_rgb({ ...this.hsv, h });
+            let { r, g, b } = hsv_to_rgb({
+                h,
+                s: Math.max(this.hsv.s, 20),
+                v: this.hsv.v,
+            });
             steps.push(`rgb(${r}, ${g}, ${b})`);
         }
         let gradient = `linear-gradient(to right, ${steps.join(", ")})`;
