@@ -1,3 +1,36 @@
+const COLORS = [
+    // rgb
+    { mode: "rgb", id: "r", colors: min_and_max(identity, { r: 0 }, { r: 255 }) },
+    { mode: "rgb", id: "g", colors: min_and_max(identity, { g: 0 }, { g: 255 }) },
+    { mode: "rgb", id: "b", colors: min_and_max(identity, { b: 0 }, { b: 255 }) },
+    // hsv
+    // hue is calculated separately
+    { mode: "hsv", id: "s", colors: min_and_max(hsv_to_rgb, { s: 0 }, { s: 100 }) },
+    { mode: "hsv", id: "v", colors: min_and_max(hsv_to_rgb, { v: 0 }, { v: 100 }) },
+    // cmyk
+    { mode: "cmyk", id: "c", colors: min_and_max(cmyk_to_rgb, { c: 0 }, { c: 100 }) },
+    { mode: "cmyk", id: "m", colors: min_and_max(cmyk_to_rgb, { m: 0 }, { m: 100 }) },
+    { mode: "cmyk", id: "y", colors: min_and_max(cmyk_to_rgb, { y: 0 }, { y: 100 }) },
+    { mode: "cmyk", id: "k", colors: min_and_max(cmyk_to_rgb, { k: 0 }, { k: 100 }) },
+];
+
+const SLIDERS = [
+    { mode: "rgb",
+        list: [ {id: "r", max: 255}, {id: "g", max: 255}, {id: "b", max: 255}],
+    },
+    { mode: "hsv",
+        list: [ {id: "h", max: 360}, {id: "s", max: 100}, {id: "v", max: 100}],
+    },
+    { mode: "cmyk",
+        list: [ {id: "c", max: 100}, {id: "m", max: 100}, {id: "y", max: 100}, {id: "k", max: 100}],
+    },
+];
+
+function init() {
+    create_sliders();
+    State.reset();
+}
+
 class State {
     static rgb  = { r: 0, g: 0, b: 0 };
     static hsv  = { h: 0, s: 0, v: 0 };
@@ -65,73 +98,6 @@ class State {
             }
         }
 
-        const COLORS = [
-            // rgb
-            { mode: "rgb", id: "r", colors: (group) => [
-                `rgb(0,   ${group.g}, ${group.b})`,
-                `rgb(255, ${group.g}, ${group.b})`,
-            ] },
-            { mode: "rgb", id: "g", colors: (group) => [
-                `rgb(${group.r}, 0,   ${group.b})`,
-                `rgb(${group.r}, 255, ${group.b})`,
-            ] },
-            { mode: "rgb", id: "b", colors: (group) => [
-                `rgb(${group.r}, ${group.g}, 0)`,
-                `rgb(${group.r}, ${group.g}, 255)`,
-            ] },
-            // hsv
-            // hue is calculated separately
-            { mode: "hsv", id: "s", colors: (group) => {
-                let min = hsv_to_rgb({ ...group, s: 0 });
-                let max = hsv_to_rgb({ ...group, s: 100 });
-                return [
-                    `rgb(${min.r}, ${min.g}, ${min.b})`,
-                    `rgb(${max.r}, ${max.g}, ${max.b})`,
-                ];
-            } },
-            { mode: "hsv", id: "v", colors: (group) => {
-                let min = hsv_to_rgb({ ...group, v: 0 });
-                let max = hsv_to_rgb({ ...group, v: 100 });
-                return [
-                    `rgb(${min.r}, ${min.g}, ${min.b})`,
-                    `rgb(${max.r}, ${max.g}, ${max.b})`,
-                ];
-            } },
-            // cmyk
-            { mode: "cmyk", id: "c", colors: (group) => {
-                let min = cmyk_to_rgb({ ...group, c: 0 });
-                let max = cmyk_to_rgb({ ...group, c: 100 });
-                return [
-                    `rgb(${min.r}, ${min.g}, ${min.b})`,
-                    `rgb(${max.r}, ${max.g}, ${max.b})`,
-                ];
-            } },
-            { mode: "cmyk", id: "m", colors: (group) => {
-                let min = cmyk_to_rgb({ ...group, m: 0 });
-                let max = cmyk_to_rgb({ ...group, m: 100 });
-                return [
-                    `rgb(${min.r}, ${min.g}, ${min.b})`,
-                    `rgb(${max.r}, ${max.g}, ${max.b})`,
-                ];
-            } },
-            { mode: "cmyk", id: "y", colors: (group) => {
-                let min = cmyk_to_rgb({ ...group, y: 0 });
-                let max = cmyk_to_rgb({ ...group, y: 100 });
-                return [
-                    `rgb(${min.r}, ${min.g}, ${min.b})`,
-                    `rgb(${max.r}, ${max.g}, ${max.b})`,
-                ];
-            } },
-            { mode: "cmyk", id: "k", colors: (group) => {
-                let min = cmyk_to_rgb({ ...group, k: 0 });
-                let max = cmyk_to_rgb({ ...group, k: 100 });
-                return [
-                    `rgb(${min.r}, ${min.g}, ${min.b})`,
-                    `rgb(${max.r}, ${max.g}, ${max.b})`,
-                ];
-            } },
-        ];
-
         for (let { mode, id, colors } of COLORS) {
             let group = this[mode];
             let [min, max] = colors(group);
@@ -168,22 +134,19 @@ class State {
     }
 }
 
-function init() {
-    create_sliders();
-    State.reset();
+function min_and_max(f, min_value, max_value) {
+    return function (group) {
+        let min = f({ ...group, ...min_value });
+        let max = f({ ...group, ...max_value });
+        return [
+            `rgb(${min.r}, ${min.g}, ${min.b})`,
+            `rgb(${max.r}, ${max.g}, ${max.b})`,
+        ];
+    };
 }
-
-const SLIDERS = [
-    { mode: "rgb",
-        list: [ {id: "r", max: 255}, {id: "g", max: 255}, {id: "b", max: 255}],
-    },
-    { mode: "hsv",
-        list: [ {id: "h", max: 360}, {id: "s", max: 100}, {id: "v", max: 100}],
-    },
-    { mode: "cmyk",
-        list: [ {id: "c", max: 100}, {id: "m", max: 100}, {id: "y", max: 100}, {id: "k", max: 100}],
-    },
-];
+function identity(x) {
+    return x;
+}
 
 function create_sliders() {
     let html = "";
@@ -200,24 +163,24 @@ function render_slider_group(mode, list) {
     }
     return `
         <div>
-        <h3>${mode}</h3>
-        ${sliders}
+            <h3> ${mode} </h3>
+            ${sliders}
         </div>
-        `;
+    `;
 }
 
 function render_slider(mode, id, max) {
     return `
         <input
-    type="range"
-    data-mode="${mode}"
-    id="slider-${id}"
-    value="0"
-    min="0"
-    max="${max}"
-    oninput="State.pull('${mode}')"
+            type="range"
+            data-mode="${mode}"
+            id="slider-${id}"
+            value="0"
+            min="0"
+            max="${max}"
+            oninput="State.pull('${mode}')"
         >
-        `;
+    `;
 }
 
 function random_rgb() {
@@ -234,11 +197,12 @@ function random_component() {
 // NOTE: Do not use object destructuring in function parameter.
 // Otherwise, if objects are passed by reference (default), they will be mutated.
 
+// NOTE: Do not touch the below functions, assume they work.
+
 function hsv_to_rgb(hsv) {
     const h = hsv.h / 360;
     const s = hsv.s / 100;
     const v = hsv.v / 100;
-
     var r, g, b, i, f, p, q, t;
     i = Math.floor(h * 6);
     f = h * 6 - i;
@@ -263,7 +227,6 @@ function rgb_to_hsv(rgb) {
     const r = rgb.r;
     const g = rgb.g;
     const b = rgb.b;
-
     var max = Math.max(r, g, b), min = Math.min(r, g, b),
         d = max - min,
         h,
@@ -292,7 +255,6 @@ function rgb_to_hex(rgb) {
     const r = rgb.r;
     const g = rgb.g;
     const b = rgb.b;
-
     return "#" + component_to_hex(r) + component_to_hex(g) + component_to_hex(b);
 }
 function hex_to_rgb(hex) {
@@ -307,21 +269,13 @@ function rgb_to_cmyk(rgb) {
     const r = rgb.r / 255;
     const g = rgb.g / 255;
     const b = rgb.b / 255;
-
-    // Calculate CMY values
     const c = 1 - r;
     const m = 1 - g;
     const y = 1 - b;
-
-    // Find the minimum of C, M, and Y to calculate K
     const k = Math.min(c, m, y);
-
-    // Adjust C, M, and Y by subtracting K
     const adjusted_c = (c - k) / (1 - k);
     const adjusted_m = (m - k) / (1 - k);
     const adjusted_y = (y - k) / (1 - k);
-
-    // Round the values and convert to percentage
     return {
         c: Math.round(adjusted_c * 100),
         m: Math.round(adjusted_m * 100),
@@ -334,13 +288,9 @@ function cmyk_to_rgb(cmyk) {
     const m = cmyk.m / 100;
     const y = cmyk.y / 100;
     const k = cmyk.k / 100;
-
-    // Calculate RGB values
     const r = Math.round(255 * (1 - c) * (1 - k));
     const g = Math.round(255 * (1 - m) * (1 - k));
     const b = Math.round(255 * (1 - y) * (1 - k));
-
-    // Ensure that the RGB values are in the range [0, 255]
     return {
         r: Math.min(255, Math.max(0, r)),
         g: Math.min(255, Math.max(0, g)),
