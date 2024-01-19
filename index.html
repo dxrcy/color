@@ -29,10 +29,12 @@
                         <input
                             type="text"
                             id="hex"
-                            value="B80A4F"
+                            value="ff0000"
+                            pattern="[a-fA-F0-9]"
                             maxlength="6"
                             title="Edit hex value"
                             oninput="State.pull('_text')"
+                            onpaste="paste_color(this, event)"
                         />
                     </span>
                 </h1>

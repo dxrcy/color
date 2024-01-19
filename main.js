@@ -178,11 +178,11 @@ class State {
         document.querySelector(".hex-full").style.color = color;
 
         const ELEMENT_COLORS = [
-            { id: "darker",  tint:  40 },
-            { id: "dark",    tint:  20 },
+            { id: "darker",  tint:  20 },
+            { id: "dark",    tint:  10 },
             { id: "color",   tint:   0 },
-            { id: "light",   tint: -20 },
-            { id: "lighter", tint: -40 },
+            { id: "light",   tint: -10 },
+            { id: "lighter", tint: -20 },
         ];
         for (let { id, tint } of ELEMENT_COLORS) {
             let hsv = {
@@ -291,13 +291,24 @@ function render_slider(mode, id, max) {
 }
 
 function copy_color(element) {
-    // TODO: Cancel if `#hex` is :focus-within
+    if (document.activeElement.id == "hex") {
+        return;
+    }
     
     let hex = element.value;
     navigator.clipboard.writeText(hex)
         .catch(function(err) {
             console.error("Failed to copy text:", err);
         });
+}
+
+function paste_color(element, event) {
+    event.preventDefault();
+    let text = (event.clipboardData || window.clipboardData).getData("text");
+    if (text.startsWith("#")) {
+        text = text.slice(1);
+    }
+    element.value = text;
 }
 
 // NOTE: Do not use object destructuring in function parameter.
