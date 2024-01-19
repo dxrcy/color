@@ -36,10 +36,7 @@ class State {
     static hsv  = { h: 0, s: 0, v: 0 };
     static cmyk = { c: 0, m: 0, y: 0, k: 0 };
 
-    static cache = {
-        h: 0,
-        s: 0,
-    };
+    static cache = { h: 0, s: 0, c: 0, m: 0, y: 0 };
 
     static sync(mode) {
         console.log(`Update for ${mode}`);
