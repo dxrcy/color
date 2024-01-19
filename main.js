@@ -26,9 +26,11 @@ const GRADIENTS = [
     { mode: "cmyk", id: "k", colors: min_and_max(cmyk_to_rgb, { k: 0 }, { k: 100 }) },
 ];
 
+const LUMINANCE_THRESHOLD = 75;
+
 function init() {
     create_sliders();
-    State.reset();
+    State.randomize();
 }
 
 class State {
@@ -171,10 +173,7 @@ class State {
         document.querySelector("#hex").value = hex.slice(1);
 
         // Set text color to contrast background color
-        function perceived_luminance({ r, g, b }) {
-            return (0.299 * r + 0.587 * g + 0.114 * b);
-        }
-        let color = perceived_luminance(this.rgb) < 60 ? "white" : "black";
+        let color = perceived_luminance(this.rgb) < LUMINANCE_THRESHOLD ? "white" : "black";
         document.querySelector(".hex-full").style.color = color;
 
         const ELEMENT_COLORS = [
@@ -247,6 +246,10 @@ function random_rgb() {
 }
 function random_component() {
     return Math.floor(Math.random() * 255);
+}
+
+function perceived_luminance({ r, g, b }) {
+    return (0.299 * r + 0.587 * g + 0.114 * b);
 }
 
 function create_sliders() {
