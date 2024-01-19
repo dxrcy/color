@@ -37,9 +37,9 @@ class State {
     static cmyk = { c: 0, m: 0, y: 0, k: 0 };
 
     static cache = { h: 0, s: 0, c: 0, m: 0, y: 0 };
+    static mode = null;
 
     static sync(mode) {
-        console.log(`Update for ${mode}`);
         switch (mode) {
 
             case "rgb": {
@@ -70,19 +70,19 @@ class State {
     }
 
     static update_cache_hsv() {
-        if (this.hsv.v == 0) {
+        if (this.hsv.v === 0) {
             this.hsv.s = Math.round(this.cache.s / 100) * 100;
         } else {
             this.cache.s = this.hsv.s;
         }
-        if (this.hsv.s == 0 || this.hsv.v == 0) {
+        if (this.hsv.s === 0 || this.hsv.v === 0) {
             this.hsv.h = this.cache.h;
         } else {
             this.cache.h = this.hsv.h;
         }
     }
     static update_cache_cmyk() {
-        if (this.hsv.v == 0) {
+        if (this.hsv.v === 0) {
             this.cmyk.c = this.cache.c;
             this.cmyk.m = this.cache.m;
             this.cmyk.y = this.cache.y;
@@ -93,14 +93,14 @@ class State {
         }
     }
     static override_hsv() {
-        if (this.cmyk.k == 100) {
+        if (this.cmyk.k === 100) {
             let hsv = cmyk_to_hsv({ ...this.cmyk, k: 50 });
             this.hsv.h = hsv.h;
             this.hsv.s = hsv.s;
         }
     }
     static override_cmyk() {
-        if (this.hsv.v == 0) {
+        if (this.hsv.v === 0) {
             let cmyk = hsv_to_cmyk({ ...this.hsv, v: 100 });
             this.cmyk.c = cmyk.c;
             this.cmyk.m = cmyk.m;
@@ -110,11 +110,20 @@ class State {
 
     static pull(mode) {
         switch (mode) {
-            case "_color": {
-                let hex = document.querySelector("#color").value;
+            case "_select": {
+                let hex = document.querySelector("#select").value;
                 this.rgb = hex_to_rgb(hex);
                 mode = "rgb";
             }; break;
+            case "_text": {
+                let hex = document.querySelector("#hex").value;
+                if (!/^[A-Fa-f0-9]{6}$/.test(hex)) {
+                    return
+                }
+                this.rgb = hex_to_rgb("#" + hex);
+                mode = "rgb";
+            }; break;
+
             case "rgb": {
                 this.rgb.r = parseInt(document.querySelector("#slider-r").value);
                 this.rgb.g = parseInt(document.querySelector("#slider-g").value);
@@ -131,6 +140,7 @@ class State {
                 this.cmyk.y = parseInt(document.querySelector("#slider-y").value);
                 this.cmyk.k = parseInt(document.querySelector("#slider-k").value);
             }; break;
+
             default: {
                 throw `Invalid mode '${mode}'`;
             }
@@ -142,7 +152,6 @@ class State {
     static push() {
         for (let { mode, list } of SLIDERS) {
             let group = this[mode];
-            console.log(group);
             for (let { id } of list) {
                 let value = group[id];
                 document.querySelector(`#slider-${id}`).value = Math.round(value);
@@ -158,9 +167,35 @@ class State {
         this.set_hue_gradient();
         
         let hex = rgb_to_hex(this.rgb);
-        document.querySelector("#color").value = hex;
-        document.querySelector("#display").style.backgroundColor = hex;
-        // document.querySelector("#display").innerText = hex;
+        document.querySelector("#select").value = hex;
+        document.querySelector("#hex").value = hex.slice(1);
+
+        // Set text color to contrast background color
+        function perceived_luminance({ r, g, b }) {
+            return (0.299 * r + 0.587 * g + 0.114 * b);
+        }
+        let color = perceived_luminance(this.rgb) < 60 ? "white" : "black";
+        document.querySelector(".hex-full").style.color = color;
+
+        const ELEMENT_COLORS = [
+            { id: "darker",  tint:  40 },
+            { id: "dark",    tint:  20 },
+            { id: "color",   tint:   0 },
+            { id: "light",   tint: -20 },
+            { id: "lighter", tint: -40 },
+        ];
+        for (let { id, tint } of ELEMENT_COLORS) {
+            let hsv = {
+                h: this.hsv.h,
+                s: Math.max(0, Math.min(100, this.hsv.s + tint)),
+                v: Math.max(0, Math.min(100, this.hsv.v - tint)),
+            };
+            let hex = hsv_to_hex(hsv);
+
+            let element = document.querySelector(`#${id}`);
+            element.style.backgroundColor = hex;
+            element.value = hex;
+        }
     }
 
     static set_hue_gradient() {
@@ -201,6 +236,17 @@ function min_and_max(f, min_value, max_value) {
 }
 function identity(x) {
     return x;
+}
+
+function random_rgb() {
+    return {
+        r: random_component(),
+        g: random_component(),
+        b: random_component(),
+    };
+}
+function random_component() {
+    return Math.floor(Math.random() * 255);
 }
 
 function create_sliders() {
@@ -244,15 +290,14 @@ function render_slider(mode, id, max) {
     `;
 }
 
-function random_rgb() {
-    return {
-        r: random_component(),
-        g: random_component(),
-        b: random_component(),
-    };
-}
-function random_component() {
-    return Math.floor(Math.random() * 255);
+function copy_color(element) {
+    // TODO: Cancel if `#hex` is :focus-within
+    
+    let hex = element.value;
+    navigator.clipboard.writeText(hex)
+        .catch(function(err) {
+            console.error("Failed to copy text:", err);
+        });
 }
 
 // NOTE: Do not use object destructuring in function parameter.
@@ -307,12 +352,12 @@ function rgb_to_hsv(rgb) {
 }
 function component_to_hex(c) {
     var hex = c.toString(16);
-    return hex.length == 1 ? "0" + hex : hex;
+    return hex.length === 1 ? "0" + hex : hex;
 }
 function rgb_to_hex(rgb) {
-    const r = rgb.r;
-    const g = rgb.g;
-    const b = rgb.b;
+    const r = Math.floor(rgb.r);
+    const g = Math.floor(rgb.g);
+    const b = Math.floor(rgb.b);
     return "#" + component_to_hex(r) + component_to_hex(g) + component_to_hex(b);
 }
 function hex_to_rgb(hex) {
@@ -355,11 +400,15 @@ function cmyk_to_rgb(cmyk) {
         b: Math.min(255, Math.max(0, b))
     };
 }
+
+// Composite color functions
+
 function cmyk_to_hsv(cmyk) {
-    let rgb = cmyk_to_rgb(cmyk);
-    return rgb_to_hsv(rgb);
+    return rgb_to_hsv(cmyk_to_rgb(cmyk));
 }
 function hsv_to_cmyk(hsv) {
-    let rgb = hsv_to_rgb(hsv);
-    return rgb_to_cmyk(rgb);
+    return rgb_to_cmyk(hsv_to_rgb(hsv));
+}
+function hsv_to_hex(hsv) {
+    return rgb_to_hex(hsv_to_rgb(hsv));
 }

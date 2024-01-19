@@ -12,12 +12,35 @@
         <div>
             <input
                 type="color"
-                id="color"
-                oninput="State.pull('_color')"
+                id="select"
+                oninput="State.pull('_select')"
             >
             <button onclick="State.randomize()"> Random </button>
         </div>
-        <div id="display"></div>
+
+        <div class="display">
+            <div id="darker" onclick="copy_color(this)"></div>
+            <div id="dark" onclick="copy_color(this)"></div>
+
+            <div id="color" onclick="copy_color(this)">
+                <h1>
+                    <span class="hex-full">
+                        <span class="hashtag">#</span>
+                        <input
+                            type="text"
+                            id="hex"
+                            value="B80A4F"
+                            maxlength="6"
+                            title="Edit hex value"
+                            oninput="State.pull('_text')"
+                        />
+                    </span>
+                </h1>
+            </div>
+
+            <div id="light" onclick="copy_color(this)"></div>
+            <div id="lighter" onclick="copy_color(this)"></div>
+        </div>
 
         <div id="sliders"></div>
     </body>
