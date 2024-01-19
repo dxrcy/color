@@ -1,4 +1,16 @@
-const COLORS = [
+const SLIDERS = [
+    { mode: "rgb",
+        list: [ {id: "r", max: 255}, {id: "g", max: 255}, {id: "b", max: 255}],
+    },
+    { mode: "hsv",
+        list: [ {id: "h", max: 360}, {id: "s", max: 100}, {id: "v", max: 100}],
+    },
+    { mode: "cmyk",
+        list: [ {id: "c", max: 100}, {id: "m", max: 100}, {id: "y", max: 100}, {id: "k", max: 100}],
+    },
+];
+
+const GRADIENTS = [
     // rgb
     { mode: "rgb", id: "r", colors: min_and_max(identity, { r: 0 }, { r: 255 }) },
     { mode: "rgb", id: "g", colors: min_and_max(identity, { g: 0 }, { g: 255 }) },
@@ -12,18 +24,6 @@ const COLORS = [
     { mode: "cmyk", id: "m", colors: min_and_max(cmyk_to_rgb, { m: 0 }, { m: 100 }) },
     { mode: "cmyk", id: "y", colors: min_and_max(cmyk_to_rgb, { y: 0 }, { y: 100 }) },
     { mode: "cmyk", id: "k", colors: min_and_max(cmyk_to_rgb, { k: 0 }, { k: 100 }) },
-];
-
-const SLIDERS = [
-    { mode: "rgb",
-        list: [ {id: "r", max: 255}, {id: "g", max: 255}, {id: "b", max: 255}],
-    },
-    { mode: "hsv",
-        list: [ {id: "h", max: 360}, {id: "s", max: 100}, {id: "v", max: 100}],
-    },
-    { mode: "cmyk",
-        list: [ {id: "c", max: 100}, {id: "m", max: 100}, {id: "y", max: 100}, {id: "k", max: 100}],
-    },
 ];
 
 function init() {
@@ -149,7 +149,7 @@ class State {
             }
         }
 
-        for (let { mode, id, colors } of COLORS) {
+        for (let { mode, id, colors } of GRADIENTS) {
             let group = this[mode];
             let [min, max] = colors(group);
             let gradient = `linear-gradient(to right, ${min}, ${max})`;

@@ -11,6 +11,7 @@ body #display {
 body #sliders {
   display: flex;
   gap: 30px;
+  flex-wrap: wrap;
 }
 body #sliders .group .rows {
   display: flex;
