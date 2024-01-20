@@ -14,7 +14,6 @@ body .display {
   margin-top: 10px;
   justify-content: space-between;
   border-radius: 10px;
-  overflow: hidden;
   background-image: linear-gradient(to right, #cccc, #cccc), linear-gradient(to right, black 50%, white 50%), linear-gradient(to bottom, black 50%, white 50%);
   background-blend-mode: normal, difference, normal;
   background-size: 1.3333333333em 1.3333333333em;
@@ -31,6 +30,12 @@ body .display div:nth-child(2), body .display div:nth-child(4) {
 }
 body .display div:nth-child(3) {
   flex: 14;
+}
+body .display div:first-child {
+  border-radius: 8px 0 0 8px;
+}
+body .display div:last-child {
+  border-radius: 0 8px 8px 0;
 }
 body .display div:active:not(:focus-within) {
   filter: brightness(95%);
