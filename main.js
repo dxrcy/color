@@ -239,8 +239,10 @@ class State {
         document.querySelector("#hex").value = hex.slice(1);
 
         // Set text color to contrast background color
+        // Decreasing alpha is equivalent to increasing luminance, since alpha background is light
+        let luminance = perceived_luminance(this.rgb) + (100 - this.alpha.a);
         let [color, bg_value] =
-            perceived_luminance(this.rgb) < LUMINANCE_THRESHOLD
+            luminance < LUMINANCE_THRESHOLD
             ? ["white", 0]
             : ["black", 100];
         document.querySelector(".hex-full").style.color = color;

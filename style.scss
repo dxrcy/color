@@ -2,7 +2,7 @@
     --alpha-color: red;
 }
 
-$checkerboard-color: #cccb;
+$checkerboard-color: #cccc;
 
 body {
     font-family: Arial;
@@ -116,7 +116,6 @@ body {
                     input[type="range"] {
                         $height: 30px;
                         $checkerboard-size: #{$height / 2};
-                        $checkerboard-color: #cccb;
                         $border-radius: 5px;
 
                         width: 100%;
