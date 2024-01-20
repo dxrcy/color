@@ -45,7 +45,7 @@ const FORMULAS = [
         rgb_to_hex(state.rgb)
     },
     { name: "HEXa", css: true, formula: (state) =>
-        rgb_to_hex(state.rgb) + component_to_hex(Math.round(state.alpha.a * 2.55))
+        rgb_to_hexa(state.rgb, state.alpha.a)
     },
 
     { name: "RGB", css: true, formula: (state) => {
@@ -247,21 +247,30 @@ class State {
         document.querySelector("#hex").value = hex.slice(1);
 
         // Set text color to contrast background color
-        let color = perceived_luminance(this.rgb) < LUMINANCE_THRESHOLD ? "white" : "black";
+        let [color, bg_value] =
+            perceived_luminance(this.rgb) < LUMINANCE_THRESHOLD
+            ? ["white", 0]
+            : ["black", 100];
         document.querySelector(".hex-full").style.color = color;
 
+        // Set background color, for large color displays
         for (let { id, tint } of ELEMENT_COLORS) {
             let hsv = {
                 h: this.hsv.h,
                 s: Math.max(0, Math.min(100, this.hsv.s + tint)),
                 v: Math.max(0, Math.min(100, this.hsv.v - tint)),
             };
-            let hex = hsv_to_hex(hsv);
+            let hex = hsv_to_hexa(hsv, this.alpha.a);
 
             let element = document.querySelector(`#${id}`);
             element.style.backgroundColor = hex;
             element.value = hex;
         }
+        // Set background color, for hex text input container
+        // Too contrast on checkerboard background
+        let hsv = { h: 0, s: 0, v: bg_value };
+        let element = document.querySelector(".hex-full");
+        element.style.backgroundColor = hsv_to_hexa(hsv, 50 - this.alpha.a);
 
         let html = "";
         for (let { name, css, formula } of FORMULAS) {
@@ -542,4 +551,14 @@ function hsv_to_cmyk(hsv) {
 }
 function hsv_to_hex(hsv) {
     return rgb_to_hex(hsv_to_rgb(hsv));
+}
+
+// Composite color functions with alpha value
+
+function rgb_to_hexa(rgb, a) {
+    return rgb_to_hex(rgb) + component_to_hex(Math.round(a * 2.55));
+}
+function hsv_to_hexa(hsv, a) {
+    let rgb = hsv_to_rgb(hsv);
+    return rgb_to_hex(rgb) + component_to_hex(Math.round(a * 2.55));
 }
