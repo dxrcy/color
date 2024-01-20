@@ -168,6 +168,9 @@ body {
                     filter: brightness(80%);
                 }
             }
+            &.divider {
+                height: 1em;
+            }
 
             th {
                 text-align: inherit;

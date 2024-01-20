@@ -41,19 +41,36 @@ const ELEMENT_COLORS = [
 ];
 
 const FORMULAS = [
+    // No alpha
     { name: "HEX", css: true, formula: (state) =>
         rgb_to_hex(state.rgb)
     },
-    { name: "HEXa", css: true, formula: (state) =>
-        rgb_to_hexa(state.rgb, state.alpha.a)
-    },
-
     { name: "RGB", css: true, formula: (state) => {
         let r = Math.round(state.rgb.r);
         let g = Math.round(state.rgb.g);
         let b = Math.round(state.rgb.b);
         return `rgb(${r}, ${g}, ${b})`;
     }},
+    { name: "HSL", css: true, formula: (state) => {
+        let hsl = hsv_to_hsl(state.hsv);
+        let h = Math.round(hsl.h);
+        let s = Math.round(hsl.s);
+        let l = Math.round(hsl.l);
+        return `hsl(${h}deg, ${s}%, ${l}%)`;
+    }},
+    { name: "HSV", css: false, formula: (state) => {
+        let h = Math.round(state.hsv.h);
+        let s = Math.round(state.hsv.s);
+        let v = Math.round(state.hsv.v);
+        return `hsv(${h}, ${s}, ${v})`;
+    }},
+
+    { divider: true },
+
+    // With alpha
+    { name: "HEXa", css: true, formula: (state) =>
+        rgb_to_hexa(state.rgb, state.alpha.a)
+    },
     { name: "RGBa", css: true, formula: (state) => {
 
         let r = Math.round(state.rgb.r);
@@ -62,14 +79,6 @@ const FORMULAS = [
         let a = Math.round(state.alpha.a) / 100;
         return `rgba(${r}, ${g}, ${b}, ${a})`;
     }},
-
-    { name: "HSL", css: true, formula: (state) => {
-        let hsl = hsv_to_hsl(state.hsv);
-        let h = Math.round(hsl.h);
-        let s = Math.round(hsl.s);
-        let l = Math.round(hsl.l);
-        return `hsl(${h}deg, ${s}%, ${l}%)`;
-    }},
     { name: "HSLa", css: true, formula: (state) => {
         let hsl = hsv_to_hsl(state.hsv);
         let h = Math.round(hsl.h);
@@ -77,13 +86,6 @@ const FORMULAS = [
         let l = Math.round(hsl.l);
         let a = Math.round(state.alpha.a);
         return `hsla(${h}deg, ${s}%, ${l}%, ${a}%)`;
-    }},
-
-    { name: "HSV", css: false, formula: (state) => {
-        let h = Math.round(state.hsv.h);
-        let s = Math.round(state.hsv.s);
-        let v = Math.round(state.hsv.v);
-        return `hsv(${h}, ${s}, ${v})`;
     }},
     { name: "HSVa", css: false, formula: (state) => {
         let h = Math.round(state.hsv.h);
@@ -264,7 +266,13 @@ class State {
         element.style.backgroundColor = hsv_to_hexa(hsv, 50 - this.alpha.a);
 
         let html = "";
-        for (let { name, css, formula } of FORMULAS) {
+        for (let { name, css, formula, divider } of FORMULAS) {
+            if (divider !== undefined) {
+                html += `
+                    <tr class="divider"> </tr>
+                `;
+                continue;
+            }
             html += `
                 <tr onclick="copy_formula('${name}')">
                     <th> ${name} </th>
