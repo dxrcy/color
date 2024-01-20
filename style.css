@@ -121,11 +121,19 @@ body #sliders .group .rows .row input[type=range]#slider-alpha-a {
   background-blend-mode: normal, difference, normal;
   background-size: 15px 15px;
 }
-body #sliders .group .rows .row input[type=range]#slider-alpha-a::-moz-range-track, body #sliders .group .rows .row input[type=range]#slider-alpha-a::-webkit-slider-runnable-track {
-  -webkit-appearance: none !important;
+body #sliders .group .rows .row input[type=range]#slider-alpha-a::-moz-range-track {
   height: 100%;
   border-radius: 4px;
   background: linear-gradient(to right, transparent, var(--alpha-color));
+}
+body #sliders .group .rows .row input[type=range]#slider-alpha-a::-webkit-slider-runnable-track {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(to right, transparent, var(--alpha-color));
+  -webkit-appearance: none !important;
+}
+body #sliders .group .rows .row input[type=range]#slider-alpha-a::-webkit-slider-thumb {
+  margin-top: -5px;
 }
 body #formulas {
   margin-top: 20px;
