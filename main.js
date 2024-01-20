@@ -106,7 +106,6 @@ class State {
     static alpha = { a: 0 };
 
     static cache = { h: 0, s: 0, c: 0, m: 0, y: 0 };
-    static mode = null;
 
     static sync(mode) {
         switch (mode) {
@@ -195,25 +194,14 @@ class State {
                 mode = "rgb";
             }; break;
 
-            case "rgb": {
-                this.rgb.r = parseInt(document.querySelector("#slider-r").value);
-                this.rgb.g = parseInt(document.querySelector("#slider-g").value);
-                this.rgb.b = parseInt(document.querySelector("#slider-b").value);
-            }; break;
-            case "hsv": {
-                this.hsv.h = parseInt(document.querySelector("#slider-h").value);
-                this.hsv.s = parseInt(document.querySelector("#slider-s").value);
-                this.hsv.v = parseInt(document.querySelector("#slider-v").value);
-            }; break;
-            case "cmyk": {
-                this.cmyk.c = parseInt(document.querySelector("#slider-c").value);
-                this.cmyk.m = parseInt(document.querySelector("#slider-m").value);
-                this.cmyk.y = parseInt(document.querySelector("#slider-y").value);
-                this.cmyk.k = parseInt(document.querySelector("#slider-k").value);
-            }; break;
-
+            case "rgb":
+            case "hsv":
+            case "cmyk":
             case "alpha": {
-                this.alpha.a = parseInt(document.querySelector("#slider-a").value);
+                for (let char in this[mode]) {
+                    let element = document.querySelector(`#slider-${mode}-${char}`);
+                    this[mode][char] = parseInt(element.value);
+                }
             }; break;
 
             default: {
@@ -229,7 +217,7 @@ class State {
             let group = this[mode];
             for (let { id, max } of list) {
                 let value = Math.round(group[id]);
-                let element = document.querySelector(`#slider-${id}`);
+                let element = document.querySelector(`#slider-${mode}-${id}`);
                 element.value = value;
                 element.title = `${value} / ${max}`;
             }
@@ -239,7 +227,7 @@ class State {
             let group = this[mode];
             let [min, max] = colors(group);
             let gradient = `linear-gradient(to right, ${min}, ${max})`;
-            document.querySelector(`#slider-${id}`).style.background = gradient;
+            document.querySelector(`#slider-${mode}-${id}`).style.background = gradient;
         }
         this.set_hue_gradient();
         this.set_alpha_gradient();
@@ -299,7 +287,7 @@ class State {
             steps.push(`rgb(${r}, ${g}, ${b})`);
         }
         let gradient = `linear-gradient(to right, ${steps.join(", ")})`;
-        document.querySelector("#slider-h").style.background = gradient;
+        document.querySelector("#slider-hsv-h").style.background = gradient;
     }
     static set_alpha_gradient() {
         let hex = rgb_to_hex(this.rgb);
@@ -378,8 +366,7 @@ function render_slider(mode, id, max) {
             <label for="${id}"> ${id.toUpperCase()} </label>
             <input
                 type="range"
-                data-mode="${mode}"
-                id="slider-${id}"
+                id="slider-${mode}-${id}"
                 name="${id}"
                 value="0"
                 min="0"

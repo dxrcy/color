@@ -98,12 +98,12 @@ body #sliders .group .rows .row input[type=range]::-moz-range-thumb {
   outline: 1px solid white;
   cursor: ew-resize;
 }
-body #sliders .group .rows .row input[type=range]#slider-a {
+body #sliders .group .rows .row input[type=range]#slider-alpha-a {
   background-image: linear-gradient(to right, #cccb, #cccb), linear-gradient(to right, black 50%, white 50%), linear-gradient(to bottom, black 50%, white 50%);
   background-blend-mode: normal, difference, normal;
   background-size: 15px 15px;
 }
-body #sliders .group .rows .row input[type=range]#slider-a::-moz-range-track {
+body #sliders .group .rows .row input[type=range]#slider-alpha-a::-moz-range-track {
   height: 100%;
   border-radius: 4px;
   background: linear-gradient(to right, transparent, var(--alpha-color));
