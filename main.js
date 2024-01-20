@@ -165,7 +165,8 @@ class State {
         }
     }
     static override_hsv() {
-        if (this.cmyk.k === 100) {
+        let cmy = this.cmyk.c + this.cmyk.m + this.cmyk.y;
+        if (this.cmyk.k === 100 && cmy < 300) {
             let hsv = cmyk_to_hsv({ ...this.cmyk, k: 50 });
             this.hsv.h = hsv.h;
             this.hsv.s = hsv.s;
@@ -249,11 +250,9 @@ class State {
 
         // Set background color, for large color displays
         for (let { id, tint } of ELEMENT_COLORS) {
-            let hsv = {
-                h: this.hsv.h,
-                s: Math.max(0, Math.min(100, this.hsv.s + tint)),
-                v: Math.max(0, Math.min(100, this.hsv.v - tint)),
-            };
+            let hsv = normalize_hsv(this.hsv);
+            hsv.s = Math.max(0, Math.min(100, this.hsv.s + tint));
+            hsv.v = Math.max(0, Math.min(100, this.hsv.v - tint));
             let hex = hsv_to_hexa(hsv, this.alpha.a);
 
             let element = document.querySelector(`#${id}`);
@@ -417,6 +416,16 @@ function paste_color(element, event) {
     }
     element.value = text;
     State.pull("_text");
+}
+
+function normalize_hsv(hsv) {
+    const h = hsv.h;
+    const s = hsv.s;
+    const v = hsv.v;
+    if (v == 0) {
+        s = 0;
+    }
+    return { h, s, v };
 }
 
 // NOTE: Do not use object destructuring in function parameter.
