@@ -350,6 +350,7 @@ function paste_color(element, event) {
         text = text.slice(1);
     }
     element.value = text;
+    State.pull("_text");
 }
 
 // NOTE: Do not use object destructuring in function parameter.
