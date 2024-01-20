@@ -1,12 +1,15 @@
 const SLIDERS = [
     { mode: "rgb",
-        list: [ {id: "r", max: 255}, {id: "g", max: 255}, {id: "b", max: 255}],
+        list: [ {id: "r", max: 255}, {id: "g", max: 255}, {id: "b", max: 255} ],
     },
     { mode: "hsv",
-        list: [ {id: "h", max: 360}, {id: "s", max: 100}, {id: "v", max: 100}],
+        list: [ {id: "h", max: 360}, {id: "s", max: 100}, {id: "v", max: 100} ],
     },
     { mode: "cmyk",
-        list: [ {id: "c", max: 100}, {id: "m", max: 100}, {id: "y", max: 100}, {id: "k", max: 100}],
+        list: [ {id: "c", max: 100}, {id: "m", max: 100}, {id: "y", max: 100}, {id: "k", max: 100} ],
+    },
+    { mode: "alpha",
+        list: [ {id: "a", max: 100} ],
     },
 ];
 
@@ -24,9 +27,72 @@ const GRADIENTS = [
     { mode: "cmyk", id: "m", colors: min_and_max(cmyk_to_rgb, { m: 0 }, { m: 100 }) },
     { mode: "cmyk", id: "y", colors: min_and_max(cmyk_to_rgb, { y: 0 }, { y: 100 }) },
     { mode: "cmyk", id: "k", colors: min_and_max(cmyk_to_rgb, { k: 0 }, { k: 100 }) },
+    // alpha is calculated separately
 ];
 
 const LUMINANCE_THRESHOLD = 75;
+
+const ELEMENT_COLORS = [
+    { id: "darker",  tint:  20 },
+    { id: "dark",    tint:  10 },
+    { id: "color",   tint:   0 },
+    { id: "light",   tint: -10 },
+    { id: "lighter", tint: -20 },
+];
+
+const FORMULAS = [
+    { name: "HEX", css: true, formula: (state) =>
+        rgb_to_hex(state.rgb)
+    },
+    { name: "HEXa", css: true, formula: (state) =>
+        rgb_to_hex(state.rgb) + component_to_hex(Math.round(state.alpha.a * 2.55))
+    },
+
+    { name: "RGB", css: true, formula: (state) => {
+        let r = Math.round(state.rgb.r);
+        let g = Math.round(state.rgb.g);
+        let b = Math.round(state.rgb.b);
+        return `rgb(${r}, ${g}, ${b})`;
+    }},
+    { name: "RGBa", css: true, formula: (state) => {
+
+        let r = Math.round(state.rgb.r);
+        let g = Math.round(state.rgb.g);
+        let b = Math.round(state.rgb.b);
+        let a = Math.round(state.alpha.a) / 100;
+        return `rgba(${r}, ${g}, ${b}, ${a})`;
+    }},
+
+    { name: "HSL", css: true, formula: (state) => {
+        let hsl = hsv_to_hsl(state.hsv);
+        let h = Math.round(hsl.h);
+        let s = Math.round(hsl.s);
+        let l = Math.round(hsl.l);
+        return `hsl(${h}deg, ${s}%, ${l}%)`;
+    }},
+    { name: "HSLa", css: true, formula: (state) => {
+        let hsl = hsv_to_hsl(state.hsv);
+        let h = Math.round(hsl.h);
+        let s = Math.round(hsl.s);
+        let l = Math.round(hsl.l);
+        let a = Math.round(state.alpha.a);
+        return `hsla(${h}deg, ${s}%, ${l}%, ${a}%)`;
+    }},
+
+    { name: "HSV", css: false, formula: (state) => {
+        let h = Math.round(state.hsv.h);
+        let s = Math.round(state.hsv.s);
+        let v = Math.round(state.hsv.v);
+        return `hsv(${h}, ${s}, ${v})`;
+    }},
+    { name: "HSVa", css: false, formula: (state) => {
+        let h = Math.round(state.hsv.h);
+        let s = Math.round(state.hsv.s);
+        let v = Math.round(state.hsv.v);
+        let a = Math.round(state.alpha.a);
+        return `hsv(${h}, ${s}, ${v}, ${a})`;
+    }},
+];
 
 function init() {
     create_sliders();
@@ -34,9 +100,10 @@ function init() {
 }
 
 class State {
-    static rgb  = { r: 0, g: 0, b: 0 };
-    static hsv  = { h: 0, s: 0, v: 0 };
-    static cmyk = { c: 0, m: 0, y: 0, k: 0 };
+    static rgb   = { r: 0, g: 0, b: 0 };
+    static hsv   = { h: 0, s: 0, v: 0 };
+    static cmyk  = { c: 0, m: 0, y: 0, k: 0 };
+    static alpha = { a: 0 };
 
     static cache = { h: 0, s: 0, c: 0, m: 0, y: 0 };
     static mode = null;
@@ -64,6 +131,8 @@ class State {
                 this.update_cache_hsv();
                 this.override_hsv();
             }; break;
+
+            case "alpha": break;
 
             default: {
                 throw `Invalid mode '${mode}'`;
@@ -143,6 +212,10 @@ class State {
                 this.cmyk.k = parseInt(document.querySelector("#slider-k").value);
             }; break;
 
+            case "alpha": {
+                this.alpha.a = parseInt(document.querySelector("#slider-a").value);
+            }; break;
+
             default: {
                 throw `Invalid mode '${mode}'`;
             }
@@ -167,6 +240,7 @@ class State {
             document.querySelector(`#slider-${id}`).style.background = gradient;
         }
         this.set_hue_gradient();
+        this.set_alpha_gradient();
         
         let hex = rgb_to_hex(this.rgb);
         document.querySelector("#select").value = hex;
@@ -176,13 +250,6 @@ class State {
         let color = perceived_luminance(this.rgb) < LUMINANCE_THRESHOLD ? "white" : "black";
         document.querySelector(".hex-full").style.color = color;
 
-        const ELEMENT_COLORS = [
-            { id: "darker",  tint:  20 },
-            { id: "dark",    tint:  10 },
-            { id: "color",   tint:   0 },
-            { id: "light",   tint: -10 },
-            { id: "lighter", tint: -20 },
-        ];
         for (let { id, tint } of ELEMENT_COLORS) {
             let hsv = {
                 h: this.hsv.h,
@@ -195,25 +262,6 @@ class State {
             element.style.backgroundColor = hex;
             element.value = hex;
         }
-
-        const FORMULAS = [
-            { name: "HEX", css: true, formula: (state) =>
-                rgb_to_hex(state.rgb)
-            },
-            { name: "RGB", css: true, formula: (state) =>
-                `rgb(${Math.round(state.rgb.r)}, ${Math.round(state.rgb.g)}, ${Math.round(state.rgb.b)})`        
-            },
-            { name: "RGBA", css: true, formula: (state) =>
-                `rgba(${Math.round(state.rgb.r)}, ${Math.round(state.rgb.g)}, ${Math.round(state.rgb.b)}, 100)`        
-            },
-            { name: "HSV", css: false, formula: (state) =>
-                `hsv(${Math.round(state.hsv.h)}, ${Math.round(state.hsv.s)}, ${Math.round(state.hsv.v)})`        
-            },
-            { name: "HSL", css: true, formula: (state) => {
-                let { h, s, l } = hsv_to_hsl(state.hsv);
-                return `hsl(${Math.round(h)}deg, ${Math.round(s)}%, ${Math.round(l)}%)`;
-            } },
-        ];
 
         let html = "";
         for (let { name, css, formula } of FORMULAS) {
@@ -241,14 +289,20 @@ class State {
         let gradient = `linear-gradient(to right, ${steps.join(", ")})`;
         document.querySelector("#slider-h").style.background = gradient;
     }
+    static set_alpha_gradient() {
+        let hex = rgb_to_hex(this.rgb);
+        document.documentElement.style.setProperty("--alpha-color", hex);
+    }
 
     static reset() {
         this.rgb = { r: 255, g: 0, b: 0 };
+        this.alpha.a = 100;
         this.sync("rgb");
         this.push();
     }
     static randomize() {
         this.rgb = random_rgb();
+        this.alpha.a = 100;
         this.sync("rgb");
         this.push();
     }
