@@ -1,0 +1,5 @@
+save color
+    on click
+        move 'copy' function to ...?
+    localstorage
+    show list at bottom, with 'copy' button
