@@ -118,4 +118,30 @@ body {
             }
         }
     }
+
+    #formulas {
+        tr {
+            &:hover {
+                td:nth-child(2) {
+                    text-decoration: underline;
+                }
+            }
+            &:active {
+                td:nth-child(2) {
+                    filter: brightness(80%);
+                }
+            }
+
+            th {
+                text-align: inherit;
+            }
+            td {
+                padding-left: 10px;
+
+                sub {
+                    opacity: 50%;
+                }
+            }
+        }
+    }
 }

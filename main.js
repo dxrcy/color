@@ -195,6 +195,37 @@ class State {
             element.style.backgroundColor = hex;
             element.value = hex;
         }
+
+        const FORMULAS = [
+            { name: "HEX", css: true, formula: (state) =>
+                rgb_to_hex(state.rgb)
+            },
+            { name: "RGB", css: true, formula: (state) =>
+                `rgb(${Math.round(state.rgb.r)}, ${Math.round(state.rgb.g)}, ${Math.round(state.rgb.b)})`        
+            },
+            { name: "RGBA", css: true, formula: (state) =>
+                `rgba(${Math.round(state.rgb.r)}, ${Math.round(state.rgb.g)}, ${Math.round(state.rgb.b)}, 100)`        
+            },
+            { name: "HSV", css: false, formula: (state) =>
+                `hsv(${Math.round(state.hsv.h)}, ${Math.round(state.hsv.s)}, ${Math.round(state.hsv.v)})`        
+            },
+            { name: "HSL", css: true, formula: (state) => {
+                let { h, s, l } = hsv_to_hsl(state.hsv);
+                return `hsl(${Math.round(h)}deg, ${Math.round(s)}%, ${Math.round(l)}%)`;
+            } },
+        ];
+
+        let html = "";
+        for (let { name, css, formula } of FORMULAS) {
+            html += `
+                <tr onclick="copy_formula('${name}')">
+                    <th> ${name} </th>
+                    <td> <code id="formula-${name}"> ${formula(this)} </code> </td>
+                    <td> <sub> ${css ? "(CSS)" : ""} </sub> </td>
+                </tr>
+            `;
+        }
+        document.querySelector("#formulas").innerHTML = html;
     }
 
     static set_hue_gradient() {
@@ -293,16 +324,23 @@ function render_slider(mode, id, max) {
     `;
 }
 
+function copy_string(string) {
+    navigator.clipboard.writeText(string)
+        .catch(function(err) {
+            console.error("Failed to copy text:", err);
+        });
+}
+
 function copy_color(element) {
     if (document.activeElement.id == "hex") {
         return;
     }
-    
-    let hex = element.value;
-    navigator.clipboard.writeText(hex)
-        .catch(function(err) {
-            console.error("Failed to copy text:", err);
-        });
+    copy_string(element.value);
+}
+
+function copy_formula(name) {
+    let element = document.querySelector(`#formula-${name}`);
+    copy_string(element.innerText);
 }
 
 function paste_color(element, event) {
@@ -412,6 +450,30 @@ function cmyk_to_rgb(cmyk) {
         r: Math.min(255, Math.max(0, r)),
         g: Math.min(255, Math.max(0, g)),
         b: Math.min(255, Math.max(0, b))
+    };
+}
+
+function hsv_to_hsl (hsv) {
+    const h = hsv.h;
+    let s = hsv.s / 100;
+    const v = hsv.v / 100;
+
+    let l = (2 - s) * v / 2;
+
+    if (l != 0) {
+        if (l == 1) {
+            s = 0;
+        } else if (l < 0.5) {
+            s = s * v / (l * 2);
+        } else {
+            s = s * v / (2 - l * 2);
+        }
+    }
+
+    return {
+        h,
+        s: s * 100,
+        l: l * 100,
     };
 }
 

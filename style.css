@@ -94,3 +94,18 @@ body #sliders .group .rows .row input[type=range]::-moz-range-thumb {
   outline: 1px solid white;
   cursor: ew-resize;
 }
+body #formulas tr:hover td:nth-child(2) {
+  text-decoration: underline;
+}
+body #formulas tr:active td:nth-child(2) {
+  filter: brightness(80%);
+}
+body #formulas tr th {
+  text-align: inherit;
+}
+body #formulas tr td {
+  padding-left: 10px;
+}
+body #formulas tr td sub {
+  opacity: 50%;
+}
