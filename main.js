@@ -227,9 +227,11 @@ class State {
     static push() {
         for (let { mode, list } of SLIDERS) {
             let group = this[mode];
-            for (let { id } of list) {
-                let value = group[id];
-                document.querySelector(`#slider-${id}`).value = Math.round(value);
+            for (let { id, max } of list) {
+                let value = Math.round(group[id]);
+                let element = document.querySelector(`#slider-${id}`);
+                element.value = value;
+                element.title = `${value} / ${max}`;
             }
         }
 
@@ -265,6 +267,7 @@ class State {
             let element = document.querySelector(`#${id}`);
             element.style.backgroundColor = hex;
             element.value = hex;
+            element.title = hex;
         }
         // Set background color, for hex text input container
         // Too contrast on checkerboard background
