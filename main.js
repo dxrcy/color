@@ -262,8 +262,11 @@ class State {
         // Set background color, for hex text input container
         // Too contrast on checkerboard background
         let hsv = { h: 0, s: 0, v: bg_value };
-        let element = document.querySelector(".hex-full");
-        element.style.backgroundColor = hsv_to_hexa(hsv, 50 - this.alpha.a);
+        let hexa = hsv_to_hexa(hsv, 100 - this.alpha.a);
+        let elements = document.querySelectorAll(".hex-full *");
+        for (let element of elements) {
+            element.style["text-shadow"] = `0 0 5px ${hexa}`;
+        }
 
         let html = "";
         for (let { name, css, formula, divider } of FORMULAS) {
