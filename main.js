@@ -531,6 +531,11 @@ function hsv_to_hsl (hsv) {
     };
 }
 
+function rgb_to_hexa(rgb, a) {
+    let alpha_255 = Math.max(0, Math.min(255, Math.round(a * 2.55)));
+    return rgb_to_hex(rgb) + component_to_hex(alpha_255);
+}
+
 // Composite color functions
 
 function cmyk_to_hsv(cmyk) {
@@ -542,13 +547,6 @@ function hsv_to_cmyk(hsv) {
 function hsv_to_hex(hsv) {
     return rgb_to_hex(hsv_to_rgb(hsv));
 }
-
-// Composite color functions with alpha value
-
-function rgb_to_hexa(rgb, a) {
-    return rgb_to_hex(rgb) + component_to_hex(Math.round(a * 2.55));
-}
 function hsv_to_hexa(hsv, a) {
-    let rgb = hsv_to_rgb(hsv);
-    return rgb_to_hex(rgb) + component_to_hex(Math.round(a * 2.55));
+    return rgb_to_hexa(hsv_to_rgb(hsv), a);
 }
