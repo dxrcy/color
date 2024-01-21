@@ -250,9 +250,11 @@ class State {
 
         // Set background color, for large color displays
         for (let { id, tint } of ELEMENT_COLORS) {
-            let hsv = normalize_hsv(this.hsv);
-            hsv.s = Math.max(0, Math.min(100, this.hsv.s + tint));
-            hsv.v = Math.max(0, Math.min(100, this.hsv.v - tint));
+            let hsv = { ...this.hsv };
+            hsv.s += tint;
+            hsv.v -= tint;
+            hsv.v = Math.max(0, Math.min(100, hsv.v));
+            hsv.s = Math.max(0, Math.min(100, hsv.s));
             let hex = hsv_to_hexa(hsv, this.alpha.a);
 
             let element = document.querySelector(`#${id}`);
@@ -416,16 +418,6 @@ function paste_color(element, event) {
     }
     element.value = text;
     State.pull("_text");
-}
-
-function normalize_hsv(hsv) {
-    const h = hsv.h;
-    const s = hsv.s;
-    const v = hsv.v;
-    if (v == 0) {
-        s = 0;
-    }
-    return { h, s, v };
 }
 
 // NOTE: Do not use object destructuring in function parameter.
