@@ -251,7 +251,7 @@ class State {
         // Set background color, for large color displays
         for (let { id, tint } of ELEMENT_COLORS) {
             let hsv = { ...this.hsv };
-            hsv.s += tint;
+            hsv.s += Math.min(0, tint);
             hsv.v -= tint;
             hsv.v = Math.max(0, Math.min(100, hsv.v));
             hsv.s = Math.max(0, Math.min(100, hsv.s));
