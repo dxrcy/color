@@ -190,6 +190,23 @@ class State {
             }; break;
             case "_text": {
                 let hex = document.querySelector("#hex").value;
+                // Repair an incomplete hex string
+                switch (hex.length) {
+                    case 0: hex = "000000"; break;
+                    // a -> aaaaaa
+                    case 1: hex = hex[0].repeat(6); break;
+                    // ab -> aabb00
+                    case 2: hex = hex[0].repeat(2) + hex[1].repeat(2) + "00"; break;
+                    // abc -> aabbcc
+                    case 3: hex = hex[0].repeat(2) + hex[1].repeat(2) + hex[2].repeat(2); break;
+                    // abcd -> abcd00
+                    case 4: hex = hex + "00"; break;
+                    // abcde -> abcdee
+                    case 5: hex = hex + hex[4]; break;
+                    case 6: break;
+                    // abcdefxyz -> abcdef
+                    default: hex = hex.slice(0, 6);
+                }
                 if (!/^[A-Fa-f0-9]{6}$/.test(hex)) {
                     return
                 }
