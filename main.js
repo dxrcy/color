@@ -1,15 +1,19 @@
 const SLIDERS = [
-    { mode: "rgb",
-        list: [ {id: "r", max: 255}, {id: "g", max: 255}, {id: "b", max: 255} ],
+    {
+        mode: "rgb",
+        list: [{ id: "r", max: 255 }, { id: "g", max: 255 }, { id: "b", max: 255 }],
     },
-    { mode: "hsv",
-        list: [ {id: "h", max: 360}, {id: "s", max: 100}, {id: "v", max: 100} ],
+    {
+        mode: "hsv",
+        list: [{ id: "h", max: 360 }, { id: "s", max: 100 }, { id: "v", max: 100 }],
     },
-    { mode: "cmyk",
-        list: [ {id: "c", max: 100}, {id: "m", max: 100}, {id: "y", max: 100}, {id: "k", max: 100} ],
+    {
+        mode: "cmyk",
+        list: [{ id: "c", max: 100 }, { id: "m", max: 100 }, { id: "y", max: 100 }, { id: "k", max: 100 }],
     },
-    { mode: "alpha",
-        list: [ {id: "a", max: 100} ],
+    {
+        mode: "alpha",
+        list: [{ id: "a", max: 100 }],
     },
 ];
 
@@ -33,67 +37,81 @@ const GRADIENTS = [
 const LUMINANCE_THRESHOLD = 75;
 
 const ELEMENT_COLORS = [
-    { id: "darker",  tint:  20 },
-    { id: "dark",    tint:  10 },
-    { id: "color",   tint:   0 },
-    { id: "light",   tint: -10 },
+    { id: "darker", tint: 20 },
+    { id: "dark", tint: 10 },
+    { id: "color", tint: 0 },
+    { id: "light", tint: -10 },
     { id: "lighter", tint: -20 },
 ];
 
 const FORMULAS = [
     // No alpha
-    { name: "HEX", css: true, formula: (state) =>
-        rgb_to_hex(state.rgb)
+    {
+        name: "HEX", css: true, formula: (state) =>
+            rgb_to_hex(state.rgb)
     },
-    { name: "RGB", css: true, formula: (state) => {
-        let r = Math.round(state.rgb.r);
-        let g = Math.round(state.rgb.g);
-        let b = Math.round(state.rgb.b);
-        return `rgb(${r}, ${g}, ${b})`;
-    }},
-    { name: "HSL", css: true, formula: (state) => {
-        let hsl = hsv_to_hsl(state.hsv);
-        let h = Math.round(hsl.h);
-        let s = Math.round(hsl.s);
-        let l = Math.round(hsl.l);
-        return `hsl(${h}deg, ${s}%, ${l}%)`;
-    }},
-    { name: "HSV", css: false, formula: (state) => {
-        let h = Math.round(state.hsv.h);
-        let s = Math.round(state.hsv.s);
-        let v = Math.round(state.hsv.v);
-        return `hsv(${h}, ${s}, ${v})`;
-    }},
+    {
+        name: "RGB", css: true, formula: (state) => {
+            let r = Math.round(state.rgb.r);
+            let g = Math.round(state.rgb.g);
+            let b = Math.round(state.rgb.b);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+    },
+    {
+        name: "HSL", css: true, formula: (state) => {
+            let hsl = hsv_to_hsl(state.hsv);
+            let h = Math.round(hsl.h);
+            let s = Math.round(hsl.s);
+            let l = Math.round(hsl.l);
+            return `hsl(${h}deg, ${s}%, ${l}%)`;
+        }
+    },
+    {
+        name: "HSV", css: false, formula: (state) => {
+            let h = Math.round(state.hsv.h);
+            let s = Math.round(state.hsv.s);
+            let v = Math.round(state.hsv.v);
+            return `hsv(${h}, ${s}, ${v})`;
+        }
+    },
 
     { divider: true },
 
     // With alpha
-    { name: "HEXa", css: true, formula: (state) =>
-        rgb_to_hexa(state.rgb, state.alpha.a)
+    {
+        name: "HEXa", css: true, formula: (state) =>
+            rgb_to_hexa(state.rgb, state.alpha.a)
     },
-    { name: "RGBa", css: true, formula: (state) => {
+    {
+        name: "RGBa", css: true, formula: (state) => {
 
-        let r = Math.round(state.rgb.r);
-        let g = Math.round(state.rgb.g);
-        let b = Math.round(state.rgb.b);
-        let a = Math.round(state.alpha.a) / 100;
-        return `rgba(${r}, ${g}, ${b}, ${a})`;
-    }},
-    { name: "HSLa", css: true, formula: (state) => {
-        let hsl = hsv_to_hsl(state.hsv);
-        let h = Math.round(hsl.h);
-        let s = Math.round(hsl.s);
-        let l = Math.round(hsl.l);
-        let a = Math.round(state.alpha.a);
-        return `hsla(${h}deg, ${s}%, ${l}%, ${a}%)`;
-    }},
-    { name: "HSVa", css: false, formula: (state) => {
-        let h = Math.round(state.hsv.h);
-        let s = Math.round(state.hsv.s);
-        let v = Math.round(state.hsv.v);
-        let a = Math.round(state.alpha.a);
-        return `hsv(${h}, ${s}, ${v}, ${a})`;
-    }},
+            let r = Math.round(state.rgb.r);
+            let g = Math.round(state.rgb.g);
+            let b = Math.round(state.rgb.b);
+            let a = Math.round(state.alpha.a) / 100;
+            return `rgba(${r}, ${g}, ${b}, ${a})`;
+        }
+    },
+    {
+        name: "HSLa", css: true, formula: (state) => {
+            let hsl = hsv_to_hsl(state.hsv);
+            let h = Math.round(hsl.h);
+            let s = Math.round(hsl.s);
+            let l = Math.round(hsl.l);
+            let a = Math.round(state.alpha.a);
+            return `hsla(${h}deg, ${s}%, ${l}%, ${a}%)`;
+        }
+    },
+    {
+        name: "HSVa", css: false, formula: (state) => {
+            let h = Math.round(state.hsv.h);
+            let s = Math.round(state.hsv.s);
+            let v = Math.round(state.hsv.v);
+            let a = Math.round(state.alpha.a);
+            return `hsv(${h}, ${s}, ${v}, ${a})`;
+        }
+    },
 ];
 
 function init() {
@@ -102,9 +120,9 @@ function init() {
 }
 
 class State {
-    static rgb   = { r: 0, g: 0, b: 0 };
-    static hsv   = { h: 0, s: 0, v: 0 };
-    static cmyk  = { c: 0, m: 0, y: 0, k: 0 };
+    static rgb = { r: 0, g: 0, b: 0 };
+    static hsv = { h: 0, s: 0, v: 0 };
+    static cmyk = { c: 0, m: 0, y: 0, k: 0 };
     static alpha = { a: 0 };
 
     static cache = { h: 0, s: 0, c: 0, m: 0, y: 0 };
@@ -251,7 +269,7 @@ class State {
         }
         this.set_hue_gradient();
         this.set_alpha_gradient();
-        
+
         let hex = rgb_to_hex(this.rgb);
         document.querySelector("#select").value = hex;
         document.querySelector("#hex").value = hex.slice(1);
@@ -261,8 +279,8 @@ class State {
         let luminance = perceived_luminance(this.rgb) + (100 - this.alpha.a);
         let [color, bg_value] =
             luminance < LUMINANCE_THRESHOLD
-            ? ["white", 0]
-            : ["black", 100];
+                ? ["white", 0]
+                : ["black", 100];
         document.querySelector(".hex-full").style.color = color;
 
         // Set background color, for large color displays
@@ -340,7 +358,7 @@ class State {
 }
 
 function min_and_max(f, min_value, max_value) {
-    return function (group) {
+    return function(group) {
         let min = f({ ...group, ...min_value });
         let max = f({ ...group, ...max_value });
         return [
@@ -477,7 +495,7 @@ function rgb_to_hsv(rgb) {
         v = max / 255;
     switch (max) {
         case min: h = 0; break;
-        case r: h = (g - b) + d * (g < b ? 6: 0); h /= 6 * d; break;
+        case r: h = (g - b) + d * (g < b ? 6 : 0); h /= 6 * d; break;
         case g: h = (b - r) + d * 2; h /= 6 * d; break;
         case b: h = (r - g) + d * 4; h /= 6 * d; break;
     }
@@ -538,7 +556,7 @@ function cmyk_to_rgb(cmyk) {
     };
 }
 
-function hsv_to_hsl (hsv) {
+function hsv_to_hsl(hsv) {
     const h = hsv.h;
     let s = hsv.s / 100;
     const v = hsv.v / 100;
