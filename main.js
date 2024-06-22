@@ -116,7 +116,63 @@ const FORMULAS = [
 
 function init() {
     create_sliders();
-    State.randomize();
+
+    const hex = get_url_hex();
+    if (hex !== null) {
+        State.hex = hex;
+        State.pull("_internal");
+    } else {
+        State.randomize();
+    }
+}
+
+function get_url_hex() {
+    const url = new URL(window.location);
+    const hex = repair_hex(url.hash);
+    if (hex === null) {
+        return null;
+    }
+    url.hash = hex;
+    history.replaceState(null, null, url);
+    return hex;
+}
+
+// Repair an incomplete but partially-valid hex string
+function repair_hex(hex) {
+    if (typeof hex !== "string") {
+        return null;
+    }
+
+    // Remove leading hashtag
+    if (hex[0] === "#") {
+        hex = hex.slice(1);
+    }
+    // Truncate to 6 characters
+    hex = hex.slice(0, 6);
+
+    // Check characters are correct
+    for (const char of hex) {
+        if (!"0123456789ABCDEFabcdef".includes(char)) {
+            return null;
+        }
+    }
+
+    switch (hex.length) {
+        // a -> aaaaaa
+        case 1: return hex[0].repeat(6);
+        // ab -> aabb00
+        case 2: return hex[0].repeat(2) + hex[1].repeat(2) + "00";
+        // abc -> aabbcc
+        case 3: return hex[0].repeat(2) + hex[1].repeat(2) + hex[2].repeat(2);
+        // abcd -> abcd00
+        case 4: return hex + "00";
+        // abcde -> abcdee
+        case 5: return hex + hex[4];
+        case 6: return hex;
+    }
+
+    // This branch should be unreachable
+    return null;
 }
 
 class State {
@@ -208,27 +264,21 @@ class State {
             }; break;
             case "_text": {
                 let hex = document.querySelector("#hex").value;
-                // Repair an incomplete hex string
-                switch (hex.length) {
-                    case 0: hex = "000000"; break;
-                    // a -> aaaaaa
-                    case 1: hex = hex[0].repeat(6); break;
-                    // ab -> aabb00
-                    case 2: hex = hex[0].repeat(2) + hex[1].repeat(2) + "00"; break;
-                    // abc -> aabbcc
-                    case 3: hex = hex[0].repeat(2) + hex[1].repeat(2) + hex[2].repeat(2); break;
-                    // abcd -> abcd00
-                    case 4: hex = hex + "00"; break;
-                    // abcde -> abcdee
-                    case 5: hex = hex + hex[4]; break;
-                    case 6: break;
-                    // abcdefxyz -> abcdef
-                    default: hex = hex.slice(0, 6);
-                }
-                if (!/^[A-Fa-f0-9]{6}$/.test(hex)) {
-                    return
+                if (hex.length === 0) {
+                    hex = "000000";
+                } else {
+                    hex = repair_hex(hex);
+                    if (hex === null) {
+                        return;
+                    }
                 }
                 this.rgb = hex_to_rgb("#" + hex);
+                console.log(hex);
+                mode = "rgb";
+            }; break;
+            case "_internal": {
+                this.rgb = hex_to_rgb("#" + this.hex);
+                this.alpha = { a: 100 };
                 mode = "rgb";
             }; break;
 
